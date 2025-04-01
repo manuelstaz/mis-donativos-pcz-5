@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patronato Zacualpan</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        .container { max-width: 400px; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; }
+        canvas { max-width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-container">
+        <h2>Inicio de Sesión</h2>
+        <input type="text" id="username" placeholder="Nombre de Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+        <button onclick="recuperarContrasena()">¿Olvidaste tu contraseña?</button>
+    </div>
+
+    <div class="container" id="dashboard" style="display:none;">
+        <h2>Panel de Control</h2>
+        <p>Saldo actual: <span id="saldo">$0</span></p>
+        <div id="admin-controls" style="display:none;">
+            <button onclick="agregarIngreso()">Agregar Ingreso</button>
+            <button onclick="registrarEgreso()">Registrar Egreso</button>
+        </div>
+        <canvas id="balanceChart"></canvas>
+    </div>
+
+    <script>
+        let saldo = 0;
+        const admins = ["Presidente", "Tesorero", "Secretario", "Vocal 1", "Vocal 2"];
+        let isAdmin = false;
+        const usuarios = { 
+            "Presidente": "admin123", 
+            "Tesorero": "admin456", 
+            "Secretario": "admin789", 
+            "Vocal 1": "admin111", 
+            "Vocal 2": "admin222" 
+        };
+
+        function login() {
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+            
+            if (usuarios[username] && usuarios[username] === password) {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+                if (admins.includes(username)) {
+                    isAdmin = true;
+                    document.getElementById('admin-controls').style.display = 'block';
+                }
+            } else {
+                Swal.fire('Error', 'Usuario o contraseña incorrectos.', 'error');
+            }
+        }
+
+        function recuperarContrasena() {
+            let username = prompt("Ingrese su nombre de usuario para recuperar la contraseña:");
+            if (usuarios[username]) {
+                Swal.fire('Recuperación de contraseña', `Su contraseña es: ${usuarios[username]}`, 'info');
+            } else {
+                Swal.fire('Error', 'Usuario no registrado.', 'error');
+            }
+        }
+
+        function agregarIngreso() {
+            if (isAdmin) {
+                saldo += 1;
+                actualizarSaldo();
+            } else {
+                Swal.fire('Acceso denegado', 'Solo administradores pueden agregar ingresos.', 'error');
+            }
+        }
+
+        function registrarEgreso() {
+            if (isAdmin) {
+                let monto = parseFloat(prompt('Ingrese el monto del egreso:'));
+                if (!isNaN(monto) && monto > 0) {
+                    saldo -= monto;
+                    actualizarSaldo();
+                }
+            } else {
+                Swal.fire('Acceso denegado', 'Solo administradores pueden registrar egresos.', 'error');
+            }
+        }
+
+        function actualizarSaldo() {
+            document.getElementById('saldo').innerText = `$${saldo}`;
+        }
+    </script>
+</body>
+</html>
